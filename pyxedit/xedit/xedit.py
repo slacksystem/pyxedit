@@ -5,26 +5,30 @@ from pyxedit.xelib import Xelib
 
 
 class XEdit(XEditBase):
-    def __init__(self,
-                 game_mode=XEditBase.GameModes.SSE,
-                 game_path=None,
-                 plugins=None,
-                 xeditlib_path=None):
+    def __init__(
+        self,
+        game_mode=XEditBase.GameModes.SSE,
+        game_path=None,
+        plugins=None,
+        xeditlib_path=None,
+    ):
         self.import_all_object_classes()
-        self._xelib = Xelib(game_mode=game_mode,
-                            game_path=game_path,
-                            plugins=plugins,
-                            xeditlib_path=xeditlib_path)
+        self._xelib = Xelib(
+            game_mode=game_mode,
+            game_path=game_path,
+            plugins=plugins,
+            xeditlib_path=xeditlib_path,
+        )
         self.handle = 0
         self.auto_release = False
 
     @property
     def game_mode(self):
-        return self._xelib.game_mode
+        return self._xelib._game_mode
 
     @game_mode.setter
     def game_mode(self, value):
-        self._xelib.game_mode = value
+        self._xelib._game_mode = value
 
     @property
     def game_path(self):
@@ -38,11 +42,12 @@ class XEdit(XEditBase):
     def plugins(self):
         return [
             self.objectify(self._xelib.file_by_index(i))
-            for i in range(self.plugin_count)]
+            for i in range(self.plugin_count)
+        ]
 
     @property
     def plugin_count(self):
-        return int(self.xelib.get_global('FileCount'))
+        return int(self.xelib.get_global("FileCount"))
 
     @property
     def plugin_names(self):
@@ -58,11 +63,11 @@ class XEdit(XEditBase):
 
     @classmethod
     def quickstart(cls, game=XEditBase.GameModes.SSE, plugins=None):
-        '''
+        """
         For when you want to play around with an xedit session in the
         interpreter quickly
-        '''
-        plugins = plugins or ['Skyrim.esm', 'Update.esm', 'Dawnguard.esm']
+        """
+        plugins = plugins or ["Skyrim.esm", "Update.esm", "Dawnguard.esm"]
         xedit = cls(game_mode=game, plugins=plugins)
         xedit.xelib.start_session()
         return xedit

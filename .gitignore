@@ -15,3 +15,7 @@ docs/_build
 /PYPI_TOKEN
 /build
 /dist
+__init__.py
+.vimspector.json
+localsettings.lua
+launch.json
