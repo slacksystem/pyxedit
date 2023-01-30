@@ -5,7 +5,6 @@
 .eggs*
 *egg-info
 .pytest_cache*
-XEditLib
 venv
 xelib_log.txt
 vim*
@@ -15,7 +14,8 @@ docs/_build
 /PYPI_TOKEN
 /build
 /dist
-__init__.py
 .vimspector.json
 localsettings.lua
-launch.json
+logs/
+.vscode/
+test/
