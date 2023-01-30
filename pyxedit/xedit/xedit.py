@@ -64,6 +64,7 @@ class XEdit(XEditBase):
     @classmethod
     def quickstart(cls, game=XEditBase.GameModes.SSE, plugins=None):
         """
+        u
         For when you want to play around with an xedit session in the
         interpreter quickly
         """

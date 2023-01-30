@@ -5,14 +5,16 @@ from pyxedit.xedit.misc import XEditError
 
 class XEditGenericObject(XEditBase):
     def __repr__(self):
-        return (f'<{self.__class__.__name__} '
-                f'{self.signature or "----"} '
-                f'{self.form_id_str or "--------"} '
-                f'{self.name} {self.handle}>')
+        return (
+            f"<{self.__class__.__name__} "
+            f'{self.signature or "----"} '
+            f'{self.form_id_str or "--------"} '
+            f"{self.name} {self.handle}>"
+        )
 
     @property
     def value(self):
-        '''
+        """
         The value property.
 
         Xelib handles point to elements that may or may not be an element that
@@ -30,13 +32,12 @@ class XEditGenericObject(XEditBase):
           - A <Types.Value> element should return the appropriately typed value
                 based on the DefType
           - Otherwise, a None should be returned.
-        '''
+        """
         if self.type == self.Types.Ref:
             referenced = self.xelib.get_links_to(self.handle, ex=False)
             return self.objectify(referenced) if referenced else None
         elif self.type == self.Types.Value:
-            if self.def_type in (self.DefTypes.String,
-                                 self.DefTypes.LString):
+            if self.def_type in (self.DefTypes.String, self.DefTypes.LString):
                 return self.xelib.get_value(self.handle)
             elif self.def_type == self.DefTypes.Integer:
                 return self.xelib.get_int_value(self.handle)
@@ -44,20 +45,21 @@ class XEditGenericObject(XEditBase):
                 return self.xelib.get_float_value(self.handle)
             else:
                 raise NotImplementedError(
-                    f'Just encountered value type {self.def_type}, which is '
-                    f'not yet supported as a gettable value; we should check '
-                    f'it out and add it')
+                    f"Just encountered value type {self.def_type}, which is "
+                    f"not yet supported as a gettable value; we should check "
+                    f"it out and add it"
+                )
 
     @value.setter
     def value(self, value):
-        '''
+        """
         Setter for the value property.
           - A <Types.Ref> element should expect another object to be provided
                 and link to it.
           - A <Types.Value> element should be set the appropriately typed value
                 based on the DefType
           - Otherwise, attempting to set the value should result in an error.
-        '''
+        """
         if self.type == self.Types.Ref:
             return self.xelib.set_links_to(self.handle, value.handle)
         elif self.type == self.Types.Value:
@@ -69,130 +71,134 @@ class XEditGenericObject(XEditBase):
                 return self.xelib.set_float_value(self.handle, float(value))
             else:
                 raise NotImplementedError(
-                    f'Just encountered value type {self.def_type}, which is '
-                    f'not yet supported as a settable value; we should check '
-                    f'it out and add it')
+                    f"Just encountered value type {self.def_type}, which is "
+                    f"not yet supported as a settable value; we should check "
+                    f"it out and add it"
+                )
         else:
-            raise XEditError(f'Cannot set the value of element {self} with '
-                             f'type {self.type}')
+            raise XEditError(
+                f"Cannot set the value of element {self} with " f"type {self.type}"
+            )
 
-    data_size = XEditAttribute('Record Header\\Data Size')
-    form_version = XEditAttribute('Record Header\\Form Version')
-    editor_id = XEditAttribute('EDID')
+    data_size = XEditAttribute("Record Header\\Data Size")
+    form_version = XEditAttribute("Record Header\\Form Version")
+    editor_id = XEditAttribute("EDID")
 
     @property
     def flags(self):
         if self.is_record:
-            return self['Record Header\\Record Flags']
+            return self["Record Header\\Record Flags"]
 
     @property
     def is_record(self):
         return self.element_type in (
             self.ElementTypes.MainRecord,
             self.ElementTypes.GroupRecord,
-            self.ElementTypes.SubRecord)
+            self.ElementTypes.SubRecord,
+        )
 
     @property
     def form_id(self):
-        '''
+        """
         The form_id property. This is only valid if the current object points
         to an ElementTypes.MainRecord. When invalid, a None is returned.
-        '''
+        """
         if self.element_type == self.ElementTypes.MainRecord:
-            form_id = self.xelib_run('get_form_id', ex=False)
+            form_id = self.xelib_run("get_form_id", ex=False)
             if form_id:
                 return form_id
 
     @property
     def form_id_str(self):
-        '''
+        """
         The form_id padded with leading 0s to 8 characters, and returned as a
         string. This is the most common string representation of a FormID
-        '''
+        """
         form_id = self.form_id
         if form_id:
-            return f'{form_id:0>8X}'
+            return f"{form_id:0>8X}"
 
     @property
     def local_form_id(self):
-        '''
+        """
         The local_form_id property. This is only valid if the current object
         points to an ElementTypes.MainRecord. When invalid, a None is returned.
-        '''
+        """
         if self.element_type == self.ElementTypes.MainRecord:
-            form_id = self.xelib_run('get_form_id', local=True, ex=False)
+            form_id = self.xelib_run("get_form_id", local=True, ex=False)
             if form_id:
                 return form_id
 
     @property
     def local_form_id_str(self):
-        '''
+        """
         The local_form_id padded with leading 0s to 8 characters, and returned
         as a string. This is the most common string representation of a FormID
-        '''
+        """
         local_form_id = self.local_form_id
         if local_form_id:
-            return f'{local_form_id:0>8X}'
+            return f"{local_form_id:0>8X}"
 
     @property
     def plugin(self):
-        return self.objectify(self.xelib_run('get_element_file'))
+        return self.objectify(self.xelib_run("get_element_file"))
 
     @property
     def is_master(self):
-        '''
+        """
         Returns whether this record is a master record. A record is a master
         record if it is a newly introduced record in its plugin, where no
         earlier plugins has the same record.
-        '''
-        return self.xelib_run('is_master')
+        """
+        return self.xelib_run("is_master")
 
     @property
     def is_injected(self):
-        return self.xelib_run('is_injected')
+        return self.xelib_run("is_injected")
 
     @property
     def is_override(self):
-        '''
+        """
         Returns whether this record is an override record. An record is an
         override record if the master record exists in some previous plugin,
         and this record intends to override it.
-        '''
-        return self.xelib_run('is_override')
+        """
+        return self.xelib_run("is_override")
 
     @property
     def is_winning_override(self):
-        return self.xelib_run('is_winning_override')
+        return self.xelib_run("is_winning_override")
 
     @property
     def master(self):
         if self.is_override:
-            return self.objectify(self.xelib_run('get_master_record'))
+            return self.objectify(self.xelib_run("get_master_record"))
 
     @property
     def overrides(self):
-        for handle in self.xelib_run('get_overrides'):
+        for handle in self.xelib_run("get_overrides"):
             yield self.objectify(handle)
 
     @property
     def winning_override(self):
         if self.is_winning_override(self):
             return self
-        return self.objectify(self.xelib_run('get_winning_override'))
+        return self.objectify(self.xelib_run("get_winning_override"))
 
     @property
     def previous_override(self):
         if self.is_override:
-            return self.objectify(self.xelib_run('get_previous_override',
-                                                 self.plugin.handle))
+            return self.objectify(
+                self.xelib_run("get_previous_override", self.plugin.handle)
+            )
 
     @property
     def injection_target(self):
         if self.is_injected:
-            return self.objectify(self.xelib_run('get_injection_target'))
+            return self.objectify(self.xelib_run("get_injection_target"))
 
-    def copy_into(self, target_plugin, mode='override'):
-        '''
+    def copy_into(self, target_plugin, mode="override"):
+        """
         Copies a record into the given target plugin.
 
         @param target_plugin: the target plugin to copy into
@@ -212,11 +218,9 @@ class XEditGenericObject(XEditBase):
                     records as override
 
             if not given, 'override' is the default value.
-        '''
+        """
         # translate the mode into an as_new value
-        as_new = {'override': False,
-                  'new': True,
-                  'mirror': self.is_master}[mode]
+        as_new = {"override": False, "new": True, "mirror": self.is_master}[mode]
 
         # for this to work, self must be a record, and target must be a file
         assert self.element_type == self.ElementTypes.MainRecord
@@ -226,28 +230,28 @@ class XEditGenericObject(XEditBase):
         target_plugin.add_masters_needed_for_copying(self, as_new=as_new)
 
         # copy our element over
-        return self.objectify(self.xelib_run('copy_element',
-                                             target_plugin.handle,
-                                             as_new=as_new))
+        return self.objectify(
+            self.xelib_run("copy_element", target_plugin.handle, as_new=as_new)
+        )
 
     def find_text_values(self, iter_groups=False):
-        '''
+        """
         Iterate over all descendants of the current node and yields any
         non-empty text values found.
-        '''
+        """
         for descendant in self.descendants(iter_groups=iter_groups):
-            if descendant.def_type in (descendant.DefTypes.String,
-                                       descendant.DefTypes.LString):
+            if descendant.def_type in (
+                descendant.DefTypes.String,
+                descendant.DefTypes.LString,
+            ):
                 value = descendant.value
                 if value:
                     yield value
 
-    def find_related_objects(self,
-                             signatures=None,
-                             recurse=False,
-                             iter_groups=False,
-                             same_plugin=False):
-        '''
+    def find_related_objects(
+        self, signatures=None, recurse=False, iter_groups=False, same_plugin=False
+    ):
+        """
         Iterates over all descendants of the current node and yields any
         non-empty reference targets.
 
@@ -257,7 +261,7 @@ class XEditGenericObject(XEditBase):
         @param same_plugin: if set to True, only reference targets belonging
                             to the same plugin as this object will be considered
                             valid for yielding and recursing
-        '''
+        """
         signatures = signatures or []
 
         # start by finding related objects for `self`; we may add to this
@@ -275,7 +279,7 @@ class XEditGenericObject(XEditBase):
                 # if the descendent element is the 'FormID' element, ignore
                 # (since all records have a 'FormID' element that just points
                 #  to itself)
-                if descendant.name == 'FormID':
+                if descendant.name == "FormID":
                     continue
 
                 # attempt to retrieve the reference target, if there's nothing
